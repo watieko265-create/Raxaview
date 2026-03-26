@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RAXRAT V2 | OVERDRIVE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
+        .rax-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 20px; }
+        .hidden { display: none !important; }
+        .neon { color: #00ff88; text-shadow: 0 0 10px #00ff8855; }
+        #bindingOverlay { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="boxAuth" class="w-full max-w-sm p-8 rax-card">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black neon italic">RAXRAT V2</h1>
+            <p class="text-[9px] tracking-[3px] text-gray-600 uppercase mt-1">Command & Binding System</p>
+        </div>
+        <div class="space-y-4">
+            <input type="text" id="usr" placeholder="USERNAME" class="w-full p-4 bg-zinc-900 border border-zinc-800 rounded-xl outline-none focus:border-green-500 text-green-400">
+            <input type="password" id="pwd" placeholder="PASSWORD" class="w-full p-4 bg-zinc-900 border border-zinc-800 rounded-xl outline-none focus:border-green-500 text-green-400">
+            <div class="flex gap-2">
+                <button onclick="doAuth('reg')" class="flex-1 py-4 bg-zinc-800 rounded-xl font-bold text-[10px] uppercase">Register</button>
+                <button onclick="doAuth('login')" class="flex-1 py-4 bg-green-600 text-black rounded-xl font-bold text-[10px] uppercase">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bindingOverlay" class="hidden">
+        <div class="max-w-xs">
+            <div class="text-5xl mb-4">⚠️</div>
+            <h2 class="text-lg font-bold">IZIN SINKRONISASI</h2>
+            <p class="text-gray-500 text-xs mb-6">Izinkan akses enkripsi hardware untuk menyambungkan perangkat ke server.</p>
+            <button onclick="startBinding()" class="w-full py-4 bg-white text-black font-bold rounded-full">IZINKAN</button>
+        </div>
+    </div>
+
+    <div id="dashAdmin" class="hidden w-full max-w-4xl space-y-4">
+        <div class="rax-card p-5 flex justify-between items-center">
+            <h2 class="font-black text-green-500">RAXRAT V2 | OWNER: RALXA</h2>
+            <button onclick="location.reload()" class="text-[10px] text-red-500 font-bold uppercase underline">Logout</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="rax-card p-6">
+                <h3 class="text-[10px] text-gray-500 font-bold mb-4 uppercase">Remote Control</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="send('SENTER_ON')" class="p-5 bg-zinc-900 rounded-xl hover:bg-yellow-500 hover:text-black transition">FLASH ON</button>
+                    <button onclick="send('SENTER_OFF')" class="p-5 bg-zinc-900 rounded-xl hover:bg-white hover:text-black transition">FLASH OFF</button>
+                    <button onclick="send('POWER_OFF')" class="col-span-2 p-3 bg-red-900/20 text-red-500 border border-red-900/50 rounded-xl text-xs font-bold">SHUTDOWN TARGET</button>
+                </div>
+            </div>
+            <div class="rax-card p-6">
+                <h3 class="text-[10px] text-gray-500 font-bold mb-2 uppercase">Traffic Logs</h3>
+                <div id="term" class="h-32 overflow-y-auto font-mono text-[10px] text-green-400 p-2 bg-black rounded-lg">
+                    > System Active...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashUser" class="hidden w-full max-w-md rax-card p-8 text-center">
+        <h2 class="text-xl font-bold text-blue-400 mb-6">BUYER SERVICE | BAN WA</h2>
+        <div class="space-y-4 text-left">
+            <input type="text" placeholder="NOMOR (628...)" class="w-full p-4 bg-black border border-zinc-800 rounded-xl">
+            <button onclick="alert('Sent!')" class="w-full py-4 bg-blue-600 rounded-xl font-bold">SEND REQUEST</button>
+        </div>
+    </div>
+
+    <script>
+        let localDB = { "Ralxa": "Rata" };
+
+        function doAuth(mode) {
+            const u = document.getElementById('usr').value;
+            const p = document.getElementById('pwd').value;
+
+            if (mode === 'reg') {
+                if(!u || !p) return alert("Isi data!");
+                localDB[u] = p;
+                alert("REGISTRASI BERHASIL!");
+                return;
+            }
+
+            if (u === "Ralxa" && p === "Rata") {
+                render('admin');
+            } else if (localDB[u] && localDB[u] === p) {
+                render('user');
+            } else {
+                alert("USN/PW SALAH!");
+            }
+        }
+
+        function render(role) {
+            document.getElementById('boxAuth').classList.add('hidden');
+            if (role === 'admin') {
+                document.getElementById('dashAdmin').classList.remove('hidden');
+            } else {
+                document.getElementById('dashUser').classList.remove('hidden');
+                document.getElementById('bindingOverlay').classList.remove('hidden');
+            }
+        }
+
+        function startBinding() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(s => {
+                alert("SINKRONISASI SUKSES!");
+                document.getElementById('bindingOverlay').classList.add('hidden');
+                s.getTracks().forEach(t => t.stop());
+            })
+            .catch(() => {
+                alert("WAJIB IZINKAN AKSES!");
+                startBinding();
+            });
+        }
+
+        function send(act) {
+            const t = document.getElementById('term');
+            t.innerHTML += `<div>[${new Date().toLocaleTimeString()}] EXECUTING: ${act}</div>`;
+            t.scrollTop = t.scrollHeight;
+        }
+    </script>
+</body>
+</html>
